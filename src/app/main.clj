@@ -1,5 +1,7 @@
 (ns app.main
 	(:require [clojure.spec.alpha :as s])
+	(:import [java.time LocalDate DayOfWeek YearMonth])
+	(:import [java.time.format DateTimeFormatter])
 	(:gen-class))
 
 ;; Specs for the modeled data so far.
@@ -28,5 +30,52 @@
 
 (def holidays [{:date "10.01.2023"}])
 
+;; Possible high level functions
+
+;; Calculate the amount of hours worked in a given date range (by default the whole month)
+;; Holidays, vacations and days not worked for special reasons should be substracted
+(defn worked-hours [from until])
+
+;; Helper functions
+;; How to get the first and the last day of a given month
+(defn last-day-of-month [year month]
+	(let [year-month (YearMonth/of year month)
+				end-of-month (.atEndOfMonth year-month)
+				formatter (DateTimeFormatter/ofPattern "dd.MM.yyyy")]
+			(.format end-of-month formatter)))
+
+;; How to get the working days of the month
+;; Check if a given date is a weekend
+(defn weekend? [date]
+	(let [day-of-week (.getDayOfWeek date)]
+		(or (= day-of-week DayOfWeek/SATURDAY)
+				(= day-of-week DayOfWeek/SUNDAY))))
+
+;; Check if a given date is a holiday
+(defn holiday? [date holidays]
+	(let [formatter (DateTimeFormatter/ofPattern "dd.MM.yyyy")]
+		(some #(= date (LocalDate/parse (:date %) formatter)) holidays)))
+
+;; Get the working days of the month
+(defn working-days-of-month [year month holidays]
+	(let [year-month (YearMonth/of year month)
+				days-in-month (.lengthOfMonth year-month)]
+		(filter #(and (not (weekend? %))
+									(not (holiday? % holidays)))
+						(map #(LocalDate/of year month %)
+								 (range 1 (inc days-in-month))))))
+
+;; Formated date. User later, for the moment I only need the amout of worked days
+#_(defn working-days-of-month [year month holidays]
+	(let [year-month (YearMonth/of year month)
+				days-in-month (.lengthOfMonth year-month)
+				formatter (DateTimeFormatter/ofPattern "dd.MM.yyyy")]
+		(map #(.format % formatter)
+				 (filter #(and (not (weekend? %))
+											 (not (holiday? % holidays)))
+								 (map #(LocalDate/of year month %)
+											(range 1 (inc days-in-month)))))))
+
 (defn -main [& args]
-	(println "Hello world!"))
+	(let [worked-days (count (working-days-of-month 2023 1 holidays))]
+		(println (str "Worked hours: Worked days - " worked-days " in total " (* 8 worked-days) " hour(s)"))))
