@@ -30,6 +30,9 @@
 
 (def holidays [{:date "10.01.2023"}])
 
+;; Amount of hours not worked on a specific day
+(def partial-days [{:date "16.01.2023" :hours 3} {:date "17.01.2023" :hours 1}]
+
 ;; Possible high level functions
 
 ;; Calculate the amount of hours worked in a given date range (by default the whole month)
@@ -76,6 +79,18 @@
 								 (map #(LocalDate/of year month %)
 											(range 1 (inc days-in-month)))))))
 
+;; Calculate the total amount of hours of vacation given a date range
+(defn vacation-hours [from to holidays]
+	(let [formatter (DateTimeFormatter/ofPattern "dd.MM.yyyy")
+				start-date (LocalDate/parse from formatter)
+				end-date (LocalDate/parse to formatter)
+				days (take-while (fn [date] (not (.isAfter date end-date)))
+												 (iterate #(.plusDays % 1) start-date))
+				vacation-days (filter #(and (not (weekend? %))
+																		(not (holiday? % holidays))) days)]
+		(* 8 (count vacation-days))))
+
 (defn -main [& args]
 	(let [worked-days (count (working-days-of-month 2023 1 holidays))]
-		(println (str "Worked hours: Worked days - " worked-days " in total " (* 8 worked-days) " hour(s)"))))
+		(println (str "Worked hours: Worked days - " worked-days " in total " (* 8 worked-days) " hour(s)")))
+	(println (str "Vacation hours: " (vacation-hours "01.01.2023" "08.01.2023" holidays))))
