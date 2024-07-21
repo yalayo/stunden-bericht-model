@@ -1,8 +1,15 @@
-entrypoint = "main.clj"
 
 hidden = [".clj-kondo", ".lsp", ".config"]
 
 modules = ["clojure-1.11:v2-20230623-0b7a606"]
+run = "clojure -A:dev -M -m api"
 
 [nix]
 channel = "stable-23_11"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[deployment]
+run = ["sh", "-c", "clojure -A:dev -M -m api"]
