@@ -1,8 +1,10 @@
-(ns api (:require [io.pedestal.http :as http]
-									[hiccup2.core :as h]
-									[environ.core :refer [env]]
-									[logic :refer [vacation-plans holidays]])
-	(:gen-class))
+(ns api 
+  (:require [io.pedestal.http :as http]
+            [hiccup2.core :as h]
+         	[hiccup.page :as hp]
+            [environ.core :refer [env]] 
+            [logic :refer [vacation-plans holidays]])
+ (:gen-class))
 
 ; Route handler
 (defn hello-world [request] {:status 200 :body "Hello"}) 
@@ -14,14 +16,22 @@
 (defn ok [body]
 	{:status 200
 	 :headers {"Content-Type" "text/html"}
-	 :body body})
+	 :body (-> body
+            (h/html)
+            (str))})
 
 (defn template [html-body]
-	(str (h/html [:html [:body (h/raw html-body)]])))
+	[:html
+ 	 [:head
+      [:title "Title"]
+      (hp/include-js "https://cdn.tailwindcss.com" "https://unpkg.com/htmx.org@1.9.4?plugins=forms")]
+     [:body (h/raw html-body)]])
+
+(defn htmx-test []
+  [:div {:class "container mx-auto mt-10"} "Prueba"])
 
 (defn respond-hello [request]
-	(let [name (get-in request [:query-params :name] "World")]
-		(ok (template (str (h/html [:h1 {} "Hello, " name "!"]) )))))
+	(ok (template (str (h/html (htmx-test))))))
 
 ;; Routes
 (def routes #{["/" :get hello-world :route-name :hello-world]
