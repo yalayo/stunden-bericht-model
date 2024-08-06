@@ -22,9 +22,9 @@
 
 (defn template [html-body]
 	[:html
- 	 [:head
-      [:title "Title"]
- 	  [:link {:href "https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" :rel "stylesheet"}]
+ 	 [:head 
+    [:title "Title"]
+ 	  [:link {:href "tailwind.min.css" :rel "stylesheet"}]
  	  [:script {:src "htmx.min.js"}]]
      [:body (h/raw html-body)]])
 
@@ -38,9 +38,7 @@
     description]
    [:div.mt-4.text-xs.font-medium.text-gray-500
     [:div.flex.items-center.gap-2
-     [:span.relative.flex.h-10.w-10.shrink-0.overflow-hidden.rounded-full
-      [:img.aspect-square.h-full.w-full
-       {:src (:picture author "https://avataaars.io/?hairColor=BrownDark")}]]
+     [:span.relative.flex.h-10.w-10.shrink-0.overflow-hidden.rounded-full]
      [:span (:name author)]]]])
 
 (defn htmx-test []
